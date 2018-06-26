@@ -1639,4 +1639,36 @@ describe(__filename, () => {
 
     sinon.assert.calledWith(dispatchSpy, errorHandler.createClearingAction());
   });
+
+  // See: https://github.com/mozilla/addons-frontend/issues/5406
+  it.only('resets the state when an admin navigating to another user page', () => {
+    const displayName = 'Admin';
+    const username = 'current-logged-in-user';
+
+    const { store } = dispatchSignInActions({
+      userProps: {
+        ...defaultUserProps,
+        username,
+        display_name: displayName,
+        permissions: [USERS_EDIT],
+      },
+    });
+
+    const root = renderUserProfileEdit({ store, params: {} });
+
+    // Create a user with another username.
+    const user = createUserAccountResponse({
+      displayName: 'Will',
+      username: 'willdurand',
+    });
+
+    root.setProps({ params: { username: user.username } });
+
+    store.dispatch(loadUserAccount({ user }));
+
+    root.setProps({ username: user.username });
+
+    expect(root).toHaveState('username', user.username);
+    expect(root).toHaveState('displayName', '');
+  });
 });

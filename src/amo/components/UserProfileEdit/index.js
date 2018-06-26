@@ -68,6 +68,7 @@ type Props = {|
 type FormValues = {|
   biography: string | null,
   displayName: string | null,
+  email: string | null,
   homepage: string | null,
   location: string | null,
   notifications: NotificationsUpdateType,
@@ -152,6 +153,14 @@ export class UserProfileEditBase extends React.Component<Props, State> {
       username: newUsername,
     } = props;
 
+    console.log({
+      oldUsername,
+      newUsername,
+      oldUser,
+      newUser,
+      state: this.state,
+    });
+
     if (oldUsername !== newUsername) {
       if (!newUser && newUsername) {
         dispatch(
@@ -173,6 +182,13 @@ export class UserProfileEditBase extends React.Component<Props, State> {
 
       this.setState({
         ...this.getFormValues(newUser),
+        username: newUsername,
+        pictureData: null,
+        successMessage: null,
+      });
+    } else if (!oldUser && newUser) {
+      this.setState({
+        //...this.getFormValues(newUser),
         pictureData: null,
         successMessage: null,
       });
@@ -194,7 +210,11 @@ export class UserProfileEditBase extends React.Component<Props, State> {
       return;
     }
 
-    if (params.username && oldUsername !== newUsername) {
+    if (
+      params.username &&
+      oldUsername !== newUsername &&
+      params.username !== newUsername
+    ) {
       router.push(`/${lang}/${clientApp}/user/${newUsername}/edit/`);
     }
   }
@@ -355,6 +375,7 @@ export class UserProfileEditBase extends React.Component<Props, State> {
     const defaultFormValues = {
       biography: '',
       displayName: '',
+      email: '',
       homepage: '',
       location: '',
       notifications: {},
@@ -370,6 +391,7 @@ export class UserProfileEditBase extends React.Component<Props, State> {
     const {
       biography,
       display_name: displayName,
+      email,
       homepage,
       location,
       occupation,
@@ -380,6 +402,7 @@ export class UserProfileEditBase extends React.Component<Props, State> {
       ...defaultFormValues,
       biography,
       displayName,
+      email,
       homepage,
       location,
       occupation,
@@ -512,7 +535,7 @@ export class UserProfileEditBase extends React.Component<Props, State> {
                 </label>
                 <input
                   className="UserProfileEdit-email"
-                  defaultValue={user && user.email}
+                  defaultValue={this.state.email}
                   disabled
                   onChange={this.onFieldChange}
                   title={i18n.gettext('Email address cannot be changed here')}
@@ -580,14 +603,6 @@ export class UserProfileEditBase extends React.Component<Props, State> {
                 value={this.state.displayName}
               />
 
-              {/*
-                TODO: Don't show these to users who don't have a public-facing
-                user profile page (eg are developers). It's just noise and may
-                encourage them to enter a lot of text (especially the bio) which
-                no one will see. It also gets in the way of settings,
-                like notifications, below.
-                See: https://github.com/mozilla/addons-frontend/issues/4964
-              */}
               <label className="UserProfileEdit--label" htmlFor="homepage">
                 {i18n.gettext('Homepage')}
               </label>
