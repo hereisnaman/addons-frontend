@@ -10,24 +10,24 @@ import {
   dispatchClientMetadata,
 } from 'tests/unit/amo/helpers';
 import {
-  createFakeRouter,
+  createContextWithFakeRouter,
+  createFakeHistory,
   fakeI18n,
   shallowUntilTarget,
   simulateComponentCallback,
 } from 'tests/unit/helpers';
 
 describe(__filename, () => {
-  let fakeRouter;
+  let fakeHistory;
 
   beforeEach(() => {
-    fakeRouter = createFakeRouter();
+    fakeHistory = createFakeHistory();
   });
 
   const getProps = (customProps = {}) => {
     return {
       i18n: fakeI18n(),
       pathname: '/search/',
-      router: fakeRouter,
       store: dispatchClientMetadata().store,
       ...customProps,
     };
@@ -35,7 +35,10 @@ describe(__filename, () => {
 
   const render = (customProps = {}) => {
     const props = getProps(customProps);
-    return shallowUntilTarget(<SearchForm {...props} />, SearchFormBase);
+
+    return shallowUntilTarget(<SearchForm {...props} />, SearchFormBase, {
+      shallowOptions: createContextWithFakeRouter({ history: fakeHistory }),
+    });
   };
 
   const simulateAutoSearchCallback = (props = {}) => {
@@ -96,7 +99,7 @@ describe(__filename, () => {
     });
     onSearch(filters);
 
-    sinon.assert.calledWith(fakeRouter.push, {
+    sinon.assert.calledWith(fakeHistory.push, {
       pathname: root.instance().baseSearchURL(),
       query: convertFiltersToQueryParams(filters),
     });
@@ -115,6 +118,6 @@ describe(__filename, () => {
     });
     onSuggestionSelected(suggestion);
 
-    sinon.assert.calledWith(fakeRouter.push, url);
+    sinon.assert.calledWith(fakeHistory.push, url);
   });
 });

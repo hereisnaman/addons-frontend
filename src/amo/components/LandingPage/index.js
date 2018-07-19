@@ -51,8 +51,10 @@ export class LandingPageBase extends React.Component {
     loading: PropTypes.bool.isRequired,
     trendingAddons: PropTypes.array.isRequired,
     i18n: PropTypes.object.isRequired,
-    params: PropTypes.objectOf({
-      visibleAddonType: PropTypes.string.isRequired,
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        visibleAddonType: PropTypes.string.isRequired,
+      }).isRequired,
     }).isRequired,
     // This is a bug; resultsLoaded is used in `componentWillReceiveProps()`.
     // eslint-disable-next-line react/no-unused-prop-types
@@ -64,7 +66,8 @@ export class LandingPageBase extends React.Component {
   };
 
   componentWillMount() {
-    const { params } = this.props;
+    const { params } = this.props.match;
+
     if (!apiAddonTypeIsValid(params.visibleAddonType)) {
       log.warn(oneLine`Skipping componentWillMount() because visibleAddonType
         is invalid: ${params.visibleAddonType}`);
@@ -76,7 +79,7 @@ export class LandingPageBase extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { params } = nextProps;
+    const { params } = nextProps.match;
 
     if (!apiAddonTypeIsValid(params.visibleAddonType)) {
       log.warn(oneLine`Skipping componentWillReceiveProps() because
@@ -94,14 +97,14 @@ export class LandingPageBase extends React.Component {
       dispatch,
       errorHandler,
       loading,
-      params,
+      match,
       resultsLoaded,
     } = {
       ...this.props,
       ...nextProps,
     };
 
-    const requestedAddonType = apiAddonType(params.visibleAddonType);
+    const requestedAddonType = apiAddonType(match.params.visibleAddonType);
 
     if (
       !loading &&
@@ -118,8 +121,8 @@ export class LandingPageBase extends React.Component {
   }
 
   setViewContextType(nextProps = {}) {
-    const { context, params } = { ...this.props, ...nextProps };
-    const addonType = apiAddonType(params.visibleAddonType);
+    const { context, match } = { ...this.props, ...nextProps };
+    const addonType = apiAddonType(match.params.visibleAddonType);
 
     if (context !== addonType) {
       this.props.dispatch(setViewContext(addonType));
@@ -208,7 +211,7 @@ export class LandingPageBase extends React.Component {
       trendingAddons,
       i18n,
     } = this.props;
-    const { visibleAddonType } = this.props.params;
+    const { visibleAddonType } = this.props.match.params;
 
     if (!apiAddonTypeIsValid(visibleAddonType)) {
       log.warn(oneLine`Rendering 404 because visibleAddonType

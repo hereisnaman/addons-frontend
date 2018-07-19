@@ -7,15 +7,16 @@ import Search from 'amo/components/Search';
 import { ADDON_TYPE_OPENSEARCH, SEARCH_SORT_RELEVANCE } from 'core/constants';
 import { convertFiltersToQueryParams } from 'core/searchUtils';
 import type { SearchFilters } from 'amo/components/AutoSearchInput';
+import type { ReactRouterLocationType } from 'core/types/router';
 
 type Props = {|
   filters: SearchFilters,
-  pathname: string,
+  location: ReactRouterLocationType,
 |};
 
 export class SearchToolsBase extends React.Component<Props> {
   render() {
-    const { filters, pathname, ...otherProps } = this.props;
+    const { filters, location, ...otherProps } = this.props;
 
     return (
       <Search
@@ -23,7 +24,7 @@ export class SearchToolsBase extends React.Component<Props> {
         enableSearchFilters
         filters={filters}
         paginationQueryParams={convertFiltersToQueryParams(filters)}
-        pathname={pathname}
+        pathname={location.pathname}
       />
     );
   }

@@ -40,7 +40,7 @@ import {
 import { ErrorHandler } from 'core/errorHandler';
 import {
   createFakeEvent,
-  createFakeRouter,
+  createFakeHistory,
   createStubErrorHandler,
   fakeI18n,
   fakeRouterLocation,
@@ -63,11 +63,13 @@ describe(__filename, () => {
     errorHandler: createStubErrorHandler(),
     i18n: fakeI18n(),
     location: fakeRouterLocation(),
-    params: {
-      username: defaultUser,
-      slug: defaultSlug,
+    match: {
+      params: {
+        username: defaultUser,
+        slug: defaultSlug,
+      },
     },
-    router: createFakeRouter(),
+    history: createFakeHistory(),
     store: dispatchClientMetadata().store,
     ...otherProps,
   });
@@ -174,8 +176,9 @@ describe(__filename, () => {
     const errorHandler = createStubErrorHandler();
     const slug = 'collection-slug';
     const username = 'some-user';
+    const params = { slug, username };
 
-    renderComponent({ errorHandler, params: { slug, username }, store });
+    renderComponent({ errorHandler, match: { params }, store });
 
     // These are the expected default values for filters.
     const filters = {
@@ -231,7 +234,7 @@ describe(__filename, () => {
     renderComponent({
       errorHandler,
       location: fakeRouterLocation({ query: { page, collection_sort: sort } }),
-      params: { slug, username },
+      match: { params: { slug, username } },
       store,
     });
 
@@ -363,7 +366,7 @@ describe(__filename, () => {
     const wrapper = renderComponent({
       errorHandler,
       location,
-      params: { slug, username },
+      match: { params: { slug, username } },
       store,
     });
     fakeDispatch.resetHistory();
@@ -371,7 +374,7 @@ describe(__filename, () => {
     // This will trigger the componentWillReceiveProps() method.
     wrapper.setProps({
       location: newLocation,
-      params: { slug: newSlug, username },
+      match: { params: { slug: newSlug, username } },
     });
 
     sinon.assert.callCount(fakeDispatch, 1);
@@ -477,7 +480,7 @@ describe(__filename, () => {
       slug: defaultSlug,
       username: 'another-user',
     };
-    wrapper.setProps({ params: newParams });
+    wrapper.setProps({ match: { params: newParams } });
 
     sinon.assert.callCount(fakeDispatch, 1);
     sinon.assert.calledWith(
@@ -506,7 +509,9 @@ describe(__filename, () => {
     fakeDispatch.resetHistory();
 
     wrapper.setProps({
-      params: { slug: defaultSlug, username: username.toLowerCase() },
+      match: {
+        params: { slug: defaultSlug, username: username.toLowerCase() },
+      },
     });
 
     sinon.assert.notCalled(fakeDispatch);
@@ -532,7 +537,7 @@ describe(__filename, () => {
       slug: 'some-other-collection-slug',
       username: defaultUser,
     };
-    wrapper.setProps({ params: newParams });
+    wrapper.setProps({ match: { params: newParams } });
 
     sinon.assert.callCount(fakeDispatch, 1);
     sinon.assert.calledWith(
@@ -564,7 +569,7 @@ describe(__filename, () => {
 
     const wrapper = renderComponent({
       location: fakeRouterLocation({ query: queryParams }),
-      params: { username, slug },
+      match: { params: { username, slug } },
       store,
     });
 
@@ -628,7 +633,7 @@ describe(__filename, () => {
 
     const wrapper = renderComponent({
       location: fakeRouterLocation({ query: filters }),
-      params: { username, slug },
+      match: { params: { username, slug } },
       store,
     });
 
@@ -764,7 +769,7 @@ describe(__filename, () => {
     const wrapper = renderComponent({
       editing: true,
       location: fakeRouterLocation({ query: { page, collection_sort: sort } }),
-      params: { username, slug },
+      match: { params: { username, slug } },
       store,
     });
 
@@ -852,7 +857,7 @@ describe(__filename, () => {
 
     const wrapper = renderComponent({
       errorHandler,
-      params: { slug, username },
+      match: { params: { slug, username } },
       store,
     });
 
@@ -1339,9 +1344,11 @@ describe(__filename, () => {
   describe('errorHandler - extractId', () => {
     it('returns a unique ID based on params', () => {
       const props = getProps({
-        params: {
-          username: 'foo',
-          slug: 'collection-bar',
+        match: {
+          params: {
+            username: 'foo',
+            slug: 'collection-bar',
+          },
         },
         location: fakeRouterLocation(),
       });
@@ -1351,9 +1358,11 @@ describe(__filename, () => {
 
     it('adds the page as part of unique ID', () => {
       const props = getProps({
-        params: {
-          username: 'foo',
-          slug: 'collection-bar',
+        match: {
+          params: {
+            username: 'foo',
+            slug: 'collection-bar',
+          },
         },
         location: fakeRouterLocation({ query: { page: 124 } }),
       });

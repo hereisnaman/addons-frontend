@@ -6,7 +6,7 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 
 import { getAddonIconUrl } from 'core/imageUtils';
 import InstallSwitch from 'core/components/InstallSwitch';
@@ -382,8 +382,10 @@ export function mapStateToProps(state) {
   };
 }
 
-export default compose(
+const InstallButton = compose(
   withRouter,
   connect(mapStateToProps),
   translate(),
 )(InstallButtonBase);
+
+export default InstallButton;

@@ -12,15 +12,18 @@ import { convertFiltersToQueryParams } from 'core/searchUtils';
 import { dispatchClientMetadata } from 'tests/unit/amo/helpers';
 import Select from 'ui/components/Select';
 import {
+  createContextWithFakeRouter,
   createFakeEvent,
+  createFakeHistory,
   createStubErrorHandler,
   fakeI18n,
+  fakeRouterLocation,
   getFakeConfig,
   shallowUntilTarget,
 } from 'tests/unit/helpers';
 
 describe(__filename, () => {
-  let fakeRouter;
+  let fakeHistory;
 
   function render({ filters = {}, pathname = '/search/', ...props } = {}) {
     const errorHandler = createStubErrorHandler();
@@ -29,19 +32,19 @@ describe(__filename, () => {
     store.dispatch(searchStart({ errorHandlerId: errorHandler.id, filters }));
 
     return shallowUntilTarget(
-      <SearchFilters
-        i18n={fakeI18n()}
-        pathname={pathname}
-        router={fakeRouter}
-        store={store}
-        {...props}
-      />,
+      <SearchFilters i18n={fakeI18n()} store={store} {...props} />,
       SearchFiltersBase,
+      {
+        shallowOptions: createContextWithFakeRouter({
+          history: fakeHistory,
+          location: fakeRouterLocation({ pathname }),
+        }),
+      },
     );
   }
 
   beforeEach(() => {
-    fakeRouter = { push: sinon.stub() };
+    fakeHistory = createFakeHistory();
   });
 
   it('renders a SearchFilters component', () => {
@@ -63,7 +66,7 @@ describe(__filename, () => {
 
     select.simulate('change', createFakeEvent({ currentTarget }));
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         addonType: ADDON_TYPE_EXTENSION,
@@ -85,7 +88,7 @@ describe(__filename, () => {
 
     select.simulate('change', createFakeEvent({ currentTarget }));
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         operatingSystem: OS_LINUX,
@@ -112,7 +115,7 @@ describe(__filename, () => {
 
     select.simulate('change', createFakeEvent({ currentTarget }));
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         query: 'Cool things',
@@ -138,7 +141,7 @@ describe(__filename, () => {
 
     select.simulate('change', createFakeEvent({ currentTarget }));
 
-    sinon.assert.notCalled(fakeRouter.push);
+    sinon.assert.notCalled(fakeHistory.push);
   });
 
   it('changes the URL when featured checkbox is checked', () => {
@@ -147,7 +150,7 @@ describe(__filename, () => {
     const checkbox = root.find('.SearchFilters-Featured');
     checkbox.simulate('change', createFakeEvent());
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         featured: true,
@@ -167,7 +170,7 @@ describe(__filename, () => {
     const checkbox = root.find('.SearchFilters-Featured');
     checkbox.simulate('change', createFakeEvent());
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         query: 'Music player',
@@ -186,7 +189,7 @@ describe(__filename, () => {
     const checkbox = root.find('.SearchFilters-Featured');
     checkbox.simulate('change', createFakeEvent());
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         featured: true,
@@ -208,7 +211,7 @@ describe(__filename, () => {
     const checkbox = root.find('.SearchFilters-Featured');
     checkbox.simulate('change', createFakeEvent());
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         page: 1,
@@ -235,7 +238,7 @@ describe(__filename, () => {
 
     select.simulate('change', createFakeEvent({ currentTarget }));
 
-    sinon.assert.calledWithExactly(fakeRouter.push, {
+    sinon.assert.calledWithExactly(fakeHistory.push, {
       pathname: `/en-US/android/search/`,
       query: convertFiltersToQueryParams({
         addonType: ADDON_TYPE_EXTENSION,
